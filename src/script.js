@@ -26,11 +26,15 @@ const axesHelper = new THREE.AxesHelper();
  * Textures
  */
 const textureLoader = new THREE.TextureLoader();
+const matCapTexture = textureLoader.load('/textures/matcaps/7.png');
+const material = new THREE.MeshMatcapMaterial({
+  matcap: matCapTexture,
+});
 
 let text;
 const fontLoader = new FontLoader();
 fontLoader.load('/fonts/Kosugi_Maru_Regular.json', (font) => {
-  const textGeometry = new TextGeometry('ヤバイ', {
+  const textGeometry = new TextGeometry('セケイ', {
     font,
     size: 1,
     height: 0.2,
@@ -43,54 +47,32 @@ fontLoader.load('/fonts/Kosugi_Maru_Regular.json', (font) => {
   });
   //textGeometry.computeBoundingBox();
   textGeometry.center();
-  const textMaterial = new THREE.MeshNormalMaterial();
-  text = new THREE.Mesh(textGeometry, textMaterial);
+  text = new THREE.Mesh(textGeometry, material);
   scene.add(text);
 });
 
 const shapeGenParams = {
-  iterations: 50,
+  iterations: 100,
   scaleRange: 10,
 };
-
-/**
- * Object
- */
+const shapeGenCube = new THREE.BoxGeometry(0.25, 0.25, 0.25);
+const shapeGenSphere = new THREE.SphereGeometry(0.15, 32, 32);
+const shapeGenTorus = new THREE.TorusBufferGeometry(0.1, 0.05, 16, 100);
 
 const generateCubes = () => {
   for (let i = 0; i <= shapeGenParams.iterations; i++) {
-    const cube = new THREE.Mesh(
-      new THREE.BoxGeometry(0.25, 0.25, 0.25),
-      new THREE.MeshNormalMaterial()
-    );
-    const sphere = new THREE.Mesh(
-      new THREE.SphereGeometry(0.15, 32, 32),
-      new THREE.MeshNormalMaterial()
-    );
-    const torus = new THREE.Mesh(
-      new THREE.TorusGeometry(0.1, 0.05, 16, 100),
-      new THREE.MeshNormalMaterial()
-    );
+    const cube = new THREE.Mesh(shapeGenCube, material);
+    const sphere = new THREE.Mesh(shapeGenSphere, material);
+    const torus = new THREE.Mesh(shapeGenTorus, material);
     scene.add(cube, sphere, torus);
     const randomizeProperties = (item) => {
-      item.position.x =
-        Math.random() * shapeGenParams.scaleRange -
-        shapeGenParams.scaleRange / 2;
-      item.position.y =
-        Math.random() * shapeGenParams.scaleRange -
-        shapeGenParams.scaleRange / 2;
-      item.position.z =
-        Math.random() * shapeGenParams.scaleRange -
-        shapeGenParams.scaleRange / 2;
-      item.rotation.x =
-        Math.random() * shapeGenParams.scaleRange -
-        shapeGenParams.scaleRange / 2;
-      item.rotation.y =
-        Math.random() * shapeGenParams.scaleRange -
-        shapeGenParams.scaleRange / 2;
-      item.rotation.z =
-        Math.random() * shapeGenParams.scaleRange -
-        shapeGenParams.scaleRange / 2;
+      item.position.x = (Math.random() - 0.5) * shapeGenParams.scaleRange;
+      item.position.y = (Math.random() - 0.5) * shapeGenParams.scaleRange;
+      item.position.z = (Math.random() - 0.5) * shapeGenParams.scaleRange;
+      item.rotation.x = (Math.random() - 0.5) * Math.PI;
+      item.rotation.y = (Math.random() - 0.5) * Math.PI;
+      const scale = Math.random() + 0.5;
+      item.scale.set(scale, scale, scale);
     };
     randomizeProperties(cube);
     randomizeProperties(sphere);
@@ -179,11 +161,11 @@ const tick = () => {
   gsap.to(camera.position, 1, { x: cursor.x });
   gsap.to(camera.position, 1, { y: -cursor.y * 2 });
   gsap.to(camera.position, 1, { z: cursor.x + 3 });
-  gsap.to(camera.roation, 1, { y: cursor.x + 0.5 });
+  gsap.to(camera.rotation, 1, { y: cursor.x + 2 });
   camera.position.x = (camera.position.x + Math.sin(elapsedTime * 0.25)) * 0.1;
   camera.position.y = (camera.position.y + Math.sin(elapsedTime * 0.25)) * 0.05;
   camera.rotation.z = (camera.position.y + Math.sin(elapsedTime) * 8) * 0.01;
-  // camera.lookAt(text.position);
+  //camera.lookAt(text.position);
 
   // Render
   renderer.render(scene, camera);
